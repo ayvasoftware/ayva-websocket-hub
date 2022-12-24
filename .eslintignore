@@ -1,0 +1,7 @@
+.ignored
+node_modules
+test-output
+src/.sandbox.*
+dist
+dist-electron
+release

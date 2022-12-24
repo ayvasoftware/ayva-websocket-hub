@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-electron
+
+.DS_Store
+.vscode
+
+release
+package-lock.json
+
+test-output

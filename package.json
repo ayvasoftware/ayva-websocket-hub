@@ -1,0 +1,44 @@
+{
+  "name": "ayva-websocket-hub",
+  "version": "0.0.1",
+  "main": "dist-electron/main/index.js",
+  "description": "Desktop application that allows forwarding data from a WebSocket to multiple outputs.",
+  "author": "soritesparadox",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "lint": "eslint . --format html -o test-output/eslint.html --ext .vue,.js,.jsx,.cjs,.mjs --fix",
+    "build": "vite build && electron-builder -mwl"
+  },
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.3.3",
+    "eslint": "^8.30.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-vue": "^9.8.0",
+    "naive-ui": "^2.34.2",
+    "vite": "^4.0.0",
+    "vite-plugin-electron": "^0.10.4",
+    "vite-plugin-electron-renderer": "^0.11.3",
+    "vue": "^3.2.40"
+  },
+  "debug": {
+    "env": {
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344"
+    }
+  },
+  "keywords": [
+    "ayvajs",
+    "osr2",
+    "sr6",
+    "stroker"
+  ]
+}
