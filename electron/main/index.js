@@ -13,6 +13,7 @@ import {
 } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
+import ipc from './ipc.js';
 
 process.env.DIST_ELECTRON = join(__dirname, '..');
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist');
@@ -41,13 +42,18 @@ const height = 500;
 async function createWindow () {
   win = new BrowserWindow({
     width,
-    height,
+    height: 250,
     title: 'Ayva WebSocket Hub',
     minWidth: width,
-    minHeight: height,
+    minHeight: 250,
     maxWidth: width,
     maxHeight: height,
     fullscreen: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#000000',
+      height: '25px',
+    },
     icon: join(process.env.PUBLIC, 'ayva.ico'),
     webPreferences: {
       preload,
@@ -57,6 +63,7 @@ async function createWindow () {
 
   if (devUrl) {
     win.loadURL(devUrl);
+    win.webContents.openDevTools();
   } else {
     win.loadFile(indexHtml);
   }
@@ -70,7 +77,10 @@ async function createWindow () {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  ipc.init();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   win = null;

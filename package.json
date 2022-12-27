@@ -14,8 +14,6 @@
   "engines": {
     "node": "^14.18.0 || >=16.0.0"
   },
-  "dependencies": {
-  },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
     "electron": "^22.0.0",
@@ -28,6 +26,7 @@
     "vite": "^4.0.0",
     "vite-plugin-electron": "^0.10.4",
     "vite-plugin-electron-renderer": "^0.11.3",
+    "vite-svg-loader": "^4.0.0",
     "vue": "^3.2.40"
   },
   "debug": {
@@ -40,5 +39,9 @@
     "osr2",
     "sr6",
     "stroker"
-  ]
+  ],
+  "dependencies": {
+    "serialport": "^10.5.0",
+    "ws": "^8.11.0"
+  }
 }

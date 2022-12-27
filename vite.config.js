@@ -5,7 +5,7 @@ import {
 } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import electron from 'vite-plugin-electron';
-import renderer from 'vite-plugin-electron-renderer';
+import svgLoader from 'vite-svg-loader';
 import pkg from './package.json';
 
 rmSync('dist-electron', { recursive: true, force: true });
@@ -34,6 +34,7 @@ function loadEnvPlugin () {
 export default defineConfig({
   plugins: [
     vue(),
+    svgLoader(),
     electron([
       {
         // Main-Process entry file of the Electron App.
@@ -46,7 +47,7 @@ export default defineConfig({
             minify: isBuild,
             outDir: 'dist-electron/main',
             rollupOptions: {
-              external: Object.keys(pkg.dependencies),
+              external: Object.keys(pkg.dependencies || {}),
             },
           },
           plugins: [loadEnvPlugin()],
@@ -64,7 +65,7 @@ export default defineConfig({
             minify: isBuild,
             outDir: 'dist-electron/preload',
             rollupOptions: {
-              external: Object.keys(pkg.dependencies),
+              external: Object.keys(pkg.dependencies || {}),
             },
           },
         },
