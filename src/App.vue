@@ -41,14 +41,58 @@
         </n-dropdown>
       </div>
     </div>
-    <div class="outputs" />
+    <div class="output-table">
+      <div class="header">
+        <div>
+          Enabled
+        </div>
+        <div>
+          Output
+        </div>
+        <div>
+          Status
+        </div>
+      </div>
+
+      <div class="outputs" :style="{ maxHeight: outputsHeight }">
+        <template v-for="(output, index) in outputs" :key="output.name">
+          <div class="enabled">
+            <ayva-checkbox v-model="output.enabled" />
+          </div>
+          <div class="name">
+            <span>{{ output.name }}</span>
+          </div>
+          <div class="status">
+            {{ output.connected ? 'Connected' : 'Disconnected' }}
+          </div>
+          <div class="delete">
+            <close-icon class="icon" @click="deleteOutput(index)" />
+          </div>
+        </template>
+      </div>
+    </div>
     <div class="footer" />
+
+    <n-modal :show="showNetworkModal" :auto-focus="false">
+      <div>
+        <div class="lil-gui">
+          <ayva-network-modal @close="showNetworkModal = false" @add="addNetworkOutput" />
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
 <script>
+import AyvaNetworkModal from './components/AyvaNetworkModal.vue';
+import AyvaCheckbox from './components/widgets/AyvaCheckbox.vue';
 
 export default {
+  components: {
+    AyvaNetworkModal,
+    AyvaCheckbox,
+  },
+
   data () {
     return {
       port: 8080,
@@ -63,6 +107,13 @@ export default {
         label: 'Serial',
         children: [],
       }],
+
+      showNetworkModal: false,
+
+      /* Haha... No */
+      appMinHeight: 250,
+      minOutputsHeight: 121,
+      outputsHeight: '121px',
     };
   },
 
@@ -90,7 +141,10 @@ export default {
   },
 
   mounted () {
-
+    setInterval(this.refreshSerialDevices, 1000);
+    window.addEventListener('resize', () => {
+      this.outputsHeight = `${this.minOutputsHeight + window.innerHeight - this.appMinHeight}px`;
+    });
   },
 
   methods: {
@@ -110,8 +164,38 @@ export default {
       }
     },
 
-    selectOutput () {
+    selectOutput (key) {
+      if (key === 'network') {
+        this.showNetworkModal = true;
+      }
+    },
 
+    addNetworkOutput (output) {
+      this.showNetworkModal = false;
+
+      const prefix = output.type === 'websocket' ? 'ws://' : 'udp://';
+      const suffix = output.type === 'websocket' ? '/ws' : '';
+
+      this.outputs.push({
+        enabled: true,
+        name: `${prefix}${output.host}:${output.port}${suffix}`,
+        connected: true,
+      });
+    },
+
+    deleteOutput (index) {
+      this.outputs.splice(index, 1);
+    },
+
+    refreshSerialDevices () {
+      window.api.listSerial().then((devices) => {
+        const newOptions = (devices || []).map((device) => ({
+          key: `serial:${device.path}`,
+          label: device.path,
+        }));
+
+        this.outputOptions.find((o) => o.key === 'serial').children = newOptions;
+      });
     },
   },
 };
@@ -177,12 +261,56 @@ export default {
     cursor: pointer;
   }
 
+  .output-table {
+    background-color: var(--ayva-background-medium-dark);
+  }
+
+  .output-table .header, .outputs {
+    display: grid;
+    grid-template-columns: 1fr 200px 1fr 1fr;
+    grid-row-gap: 10px;
+    padding-top: 10px;
+  }
+
+  .output-table .header > * {
+    text-align: center;
+    color: var(--ayva-text-color-light-gray);
+  }
+
   .outputs {
-    /* border-top: 1px groove var(--ayva-background-medium); */
-    background-color: var(--ayva-background-medium);
+    overflow: scroll;
+  }
+
+  .outputs .enabled {
+    grid-column: 1;
+    justify-content: center;
+  }
+
+  .outputs .status, .outputs .delete {
+    justify-content: center;
+  }
+
+  .outputs .name, .outputs .status {
+    color: var(--text-color);
+    opacity: 0.5;
+  }
+
+  .outputs > * {
+    display: flex;
+    align-items: center;
   }
 
   label {
     padding: 0 5px;
+  }
+
+  .delete .icon {
+    color: var(--ayva-color-error);
+  }
+
+  .name > * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>

@@ -5,6 +5,7 @@ body {
   --ayva-text-color-off-white: rgb(235, 235, 235);
   --ayva-text-color-light-gray: rgb(176, 176, 176);
   --ayva-background-dark: rgb(17, 17, 17);
+  --ayva-background-medium-dark: rgb(20, 20, 20);
   --ayva-background-medium: rgb(24, 24, 24);
   --ayva-background-light: rgb(31, 31, 31);
   --ayva-hover-opacity: 0.85;
@@ -356,7 +357,6 @@ button[disabled] {
 
 .icon {
   width: 25px;
-  margin-top: 2px;
 }
 
 .icon:hover:not([disabled]) {

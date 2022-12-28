@@ -37,17 +37,18 @@ const preload = join(__dirname, '../preload/index.js');
 const indexHtml = join(process.env.DIST, 'index.html');
 const devUrl = process.env.VITE_DEV_SERVER_URL;
 const width = 500;
-const height = 500;
+const height = 250;
+const maxHeight = 500;
 
 async function createWindow () {
   win = new BrowserWindow({
     width,
-    height: 250,
+    height,
     title: 'Ayva WebSocket Hub',
     minWidth: width,
-    minHeight: 250,
+    minHeight: height,
     maxWidth: width,
-    maxHeight: height,
+    maxHeight: maxHeight,
     fullscreen: false,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
