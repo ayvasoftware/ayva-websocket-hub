@@ -1,4 +1,4 @@
-import ipc from './ipc';
+import ipc from './ipc-preload';
 import loadingSpinner from './loading-spinner';
 
 loadingSpinner.init();

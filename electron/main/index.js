@@ -13,7 +13,7 @@ import {
 } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
-import ipc from './ipc.js';
+import ipc from './ipc-main.js';
 
 process.env.DIST_ELECTRON = join(__dirname, '..');
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist');
