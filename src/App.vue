@@ -71,7 +71,10 @@
         </template>
       </div>
     </div>
-    <div class="footer" />
+    <div class="footer">
+      <label>Status:</label>
+      <span class="status">{{ state }}</span>
+    </div>
 
     <n-modal :show="showNetworkModal" :auto-focus="false">
       <div>
@@ -95,7 +98,7 @@ export default {
 
   data () {
     return {
-      port: 8080,
+      port: 8081,
       state: 'Disconnected',
       outputs: [],
 
@@ -145,6 +148,14 @@ export default {
     window.addEventListener('resize', () => {
       this.outputsHeight = `${this.minOutputsHeight + window.innerHeight - this.appMinHeight}px`;
     });
+
+    window.apiEvents.onConnected(() => {
+      this.state = 'Connected';
+    });
+
+    window.apiEvents.onDisconnected(() => {
+      this.stopServer();
+    });
   },
 
   methods: {
@@ -158,9 +169,9 @@ export default {
 
     toggleState () {
       if (this.state === 'Disconnected') {
-        this.state = 'Listening';
+        this.startServer();
       } else {
-        this.state = 'Disconnected';
+        this.stopServer();
       }
     },
 
@@ -185,6 +196,22 @@ export default {
 
     deleteOutput (index) {
       this.outputs.splice(index, 1);
+
+      if (this.outputs.length <= 0) {
+        this.stopServer();
+      }
+    },
+
+    startServer () {
+      api.startServer(this.port).then(() => {
+        this.state = 'Listening';
+      });
+    },
+
+    stopServer () {
+      api.stopServer().then(() => {
+        this.state = 'Disconnected';
+      });
     },
 
     refreshSerialDevices () {
@@ -312,5 +339,12 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .footer {
+    color: var(--ayva-text-color-light-gray);
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
   }
 </style>

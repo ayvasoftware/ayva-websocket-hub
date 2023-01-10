@@ -33,6 +33,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win = null;
+let controller = null;
+
 const preload = join(__dirname, '../preload/index.js');
 const indexHtml = join(process.env.DIST, 'index.html');
 const devUrl = process.env.VITE_DEV_SERVER_URL;
@@ -76,18 +78,19 @@ async function createWindow () {
     }
     return { action: 'deny' };
   });
+
+  if (!controller) {
+    controller = ipc.init();
+  }
+
+  controller.events = win.webContents;
 }
 
-app.whenReady().then(() => {
-  ipc.init();
-  createWindow();
-});
+app.whenReady().then(() => createWindow());
 
 app.on('window-all-closed', () => {
   win = null;
-  if (process.platform !== 'darwin' || devUrl) {
-    app.quit();
-  }
+  app.quit();
 });
 
 app.on('second-instance', () => {

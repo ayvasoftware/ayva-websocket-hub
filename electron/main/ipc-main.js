@@ -9,5 +9,7 @@ export default {
     controller.getPublicApi().forEach(({ method, handler }) => {
       ipcMain.handle(handler, (event, ...args) => controller[method](...args));
     });
+
+    return controller;
   },
 };
