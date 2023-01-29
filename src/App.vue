@@ -186,11 +186,17 @@ export default {
 
       const prefix = output.type === 'websocket' ? 'ws://' : 'udp://';
       const suffix = output.type === 'websocket' ? '/ws' : '';
+      const name = `${prefix}${output.host}:${output.port}${suffix}`;
 
       this.outputs.push({
+        name,
         enabled: true,
-        name: `${prefix}${output.host}:${output.port}${suffix}`,
         connected: true,
+      });
+
+      window.api.addOutput(output.type, name, {
+        host: output.host,
+        port: output.port,
       });
     },
 

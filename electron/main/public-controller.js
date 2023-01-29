@@ -1,6 +1,7 @@
 import { SerialPort } from 'serialport';
 import { WebSocketServer } from 'ws';
 import _ from 'lodash';
+import WebSocketOutput from './lib/websocket-output';
 
 /**
  * This is the Public Backend Controller. All methods on this class will be made available
@@ -12,6 +13,8 @@ export default class PublicController {
   #server;
 
   #websocket;
+
+  #outputs = [];
 
   constructor () {
     this.events = null;
@@ -36,6 +39,21 @@ export default class PublicController {
   }
 
   /**
+   * Add a new output with the specified type, id, and details.
+   *
+   * @param {String} type
+   * @param {String|Number} id
+   * @param {Object} details
+   */
+  addOutput (type, id, details) {
+    if (type === 'websocket') {
+      const output = new WebSocketOutput(id, this.events, details.host, details.port);
+      this.#outputs.push(output);
+      output.poll();
+    }
+  }
+
+  /**
    * Start the WebSocket server on the specified port. Any existing server will be stopped.
    *
    * @param {Number} port
@@ -52,7 +70,11 @@ export default class PublicController {
         const forward = Buffer.from(data);
 
         this.events.send('message', forward.toString());
-        // TODO: Pipe all the data to all the places here...
+        for (const output of this.#outputs) {
+          if (output.connected) {
+            output.write(forward.toString());
+          }
+        }
       });
 
       websocket.on('close', () => {
