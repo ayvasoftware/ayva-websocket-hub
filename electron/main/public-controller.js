@@ -25,7 +25,7 @@ export default class PublicController {
    */
   getPublicApi () {
     return Object.getOwnPropertyNames(PublicController.prototype)
-      .filter((method) => method !== 'constructor').map((method) => ({
+      .filter((method) => method !== 'constructor' && !method.startsWith('_')).map((method) => ({
         method,
         handler: _.kebabCase(method),
       }));
@@ -53,6 +53,24 @@ export default class PublicController {
     }
   }
 
+  deleteOutput (id) {
+    const index = this.#outputs.findIndex((o) => o.id === id);
+
+    if (index !== -1) {
+      const [deletedOutput] = this.#outputs.splice(index, 1);
+
+      deletedOutput.dispose(); // Prevent future polling.
+    }
+  }
+
+  toggleOutputEnabled (id, enabled) {
+    const output = this.#outputs.find((o) => o.id === id);
+
+    if (output) {
+      output.enabled = enabled;
+    }
+  }
+
   /**
    * Start the WebSocket server on the specified port. Any existing server will be stopped.
    *
@@ -71,7 +89,7 @@ export default class PublicController {
 
         this.events.send('message', forward.toString());
         for (const output of this.#outputs) {
-          if (output.connected) {
+          if (output.connected && output.enabled) {
             output.write(forward.toString());
           }
         }

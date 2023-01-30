@@ -57,7 +57,7 @@
       <div class="outputs" :style="{ maxHeight: outputsHeight }">
         <template v-for="(output, index) in outputs" :key="output.name">
           <div class="enabled">
-            <ayva-checkbox v-model="output.enabled" />
+            <ayva-checkbox v-model="output.enabled" @change="toggleOutputEnabled(output.name, $event)" />
           </div>
           <div class="name">
             <span>{{ output.name }}</span>
@@ -156,6 +156,22 @@ export default {
     window.apiEvents.onDisconnected(() => {
       this.stopServer();
     });
+
+    window.apiEvents.onOutputConnected((name) => {
+      const output = this.outputs.find((o) => o.name === name);
+
+      if (output) {
+        output.connected = true;
+      }
+    });
+
+    window.apiEvents.onOutputDisconnected((name) => {
+      const output = this.outputs.find((o) => o.name === name);
+
+      if (output) {
+        output.connected = false;
+      }
+    });
   },
 
   methods: {
@@ -191,7 +207,7 @@ export default {
       this.outputs.push({
         name,
         enabled: true,
-        connected: true,
+        connected: false,
       });
 
       window.api.addOutput(output.type, name, {
@@ -201,7 +217,9 @@ export default {
     },
 
     deleteOutput (index) {
-      this.outputs.splice(index, 1);
+      const [deletedOutput] = this.outputs.splice(index, 1);
+
+      api.deleteOutput(deletedOutput.name);
 
       if (this.outputs.length <= 0) {
         this.stopServer();
@@ -218,6 +236,10 @@ export default {
       api.stopServer().then(() => {
         this.state = 'Disconnected';
       });
+    },
+
+    toggleOutputEnabled (name, enabled) {
+      api.toggleOutputEnabled(name, enabled);
     },
 
     refreshSerialDevices () {

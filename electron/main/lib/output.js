@@ -3,7 +3,11 @@ export default class Output {
 
   #events;
 
+  #disposed;
+
   connected;
+
+  enabled;
 
   get id () {
     return this.#id;
@@ -12,12 +16,17 @@ export default class Output {
   constructor (id, events) {
     this.#id = id;
     this.#events = events;
+    this.enabled = true;
   }
 
   poll () {
+    if (this.#disposed) {
+      return;
+    }
+
     console.log('Started polling.');
 
-    return this.connect().then(() => {
+    this.connect().then(() => {
       this.connected = true;
       console.log('Connected to output.');
       this.#events.send('output-connected', this.id);
@@ -44,5 +53,13 @@ export default class Output {
 
   write (data) { // eslint-disable-line no-unused-vars
     throw new Error('Output does not implement write()');
+  }
+
+  dispose () {
+    if (this.connected) {
+      this.disconnect();
+    }
+
+    this.#disposed = true;
   }
 }

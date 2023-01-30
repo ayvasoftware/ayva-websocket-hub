@@ -83,7 +83,16 @@ async function createWindow () {
     controller = ipc.init();
   }
 
-  controller.events = win.webContents;
+  const { webContents } = win;
+
+  controller.events = {
+    send (...args) {
+      // Make sure we never try to send events to a destroyed window...
+      if (!webContents.isDestroyed()) {
+        webContents.send(...args);
+      }
+    },
+  };
 }
 
 app.whenReady().then(() => createWindow());
