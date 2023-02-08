@@ -24,14 +24,10 @@ export default class Output {
       return;
     }
 
-    console.log('Started polling.');
-
     this.connect().then(() => {
       this.connected = true;
-      console.log('Connected to output.');
       this.#events.send('output-connected', this.id);
     }).catch(() => {
-      console.log(`Failed to connect to output ${this.#id}. Retrying.`);
       setTimeout(() => this.poll(), 1000);
     });
   }

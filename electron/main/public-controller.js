@@ -2,6 +2,7 @@ import { SerialPort } from 'serialport';
 import { WebSocketServer } from 'ws';
 import _ from 'lodash';
 import WebSocketOutput from './lib/websocket-output';
+import UdpOutput from './lib/udp-output';
 
 /**
  * This is the Public Backend Controller. All methods on this class will be made available
@@ -44,15 +45,29 @@ export default class PublicController {
    * @param {String} type
    * @param {String|Number} id
    * @param {Object} details
+   * @param {Boolean} enabled
    */
-  addOutput (type, id, details) {
+  addOutput (type, id, details, enabled = true) {
+    let output;
+
     if (type === 'websocket') {
-      const output = new WebSocketOutput(id, this.events, details.host, details.port);
+      output = new WebSocketOutput(id, this.events, details.host, details.port);
+    } else if (type === 'udp') {
+      output = new UdpOutput(id, this.events, details.host, details.port);
+    }
+
+    if (output) {
+      output.enabled = enabled;
       this.#outputs.push(output);
       output.poll();
     }
   }
 
+  /**
+   * Delete the output with the specified id.
+   *
+   * @param {String|Nuber} id
+   */
   deleteOutput (id) {
     const index = this.#outputs.findIndex((o) => o.id === id);
 
@@ -63,6 +78,10 @@ export default class PublicController {
     }
   }
 
+  /**
+   * @param {String|Number} id
+   * @param {Boolean} enabled
+   */
   toggleOutputEnabled (id, enabled) {
     const output = this.#outputs.find((o) => o.id === id);
 
@@ -106,6 +125,9 @@ export default class PublicController {
     this.#server = server;
   }
 
+  /**
+   * <3
+   */
   stopServer () {
     if (this.#server) {
       if (this.#websocket) {

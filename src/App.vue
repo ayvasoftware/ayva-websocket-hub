@@ -89,6 +89,9 @@
 <script>
 import AyvaNetworkModal from './components/AyvaNetworkModal.vue';
 import AyvaCheckbox from './components/widgets/AyvaCheckbox.vue';
+import Storage from './lib/ayva-storage.js';
+
+const storage = new Storage('settings');
 
 export default {
   components: {
@@ -98,7 +101,7 @@ export default {
 
   data () {
     return {
-      port: 8081,
+      port: 8080,
       state: 'Disconnected',
       outputs: [],
 
@@ -143,6 +146,25 @@ export default {
     },
   },
 
+  watch: {
+    port (value) {
+      if (value) {
+        const port = Number(value);
+
+        if (Number.isFinite(port) && port >= 1 && port <= 65535) {
+          storage.save('port', port);
+        }
+      }
+    },
+
+    outputs: {
+      deep: true,
+      handler () {
+        this.saveOutputs();
+      },
+    },
+  },
+
   mounted () {
     setInterval(this.refreshSerialDevices, 1000);
     window.addEventListener('resize', () => {
@@ -172,6 +194,10 @@ export default {
         output.connected = false;
       }
     });
+
+    this.loadOutputs();
+
+    this.port = storage.load('port') || 8080;
   },
 
   methods: {
@@ -204,16 +230,25 @@ export default {
       const suffix = output.type === 'websocket' ? '/ws' : '';
       const name = `${prefix}${output.host}:${output.port}${suffix}`;
 
+      if (this.outputs.find((o) => o.name === name)) {
+        // No duplicates.
+        return;
+      }
+
+      const details = {
+        host: output.host,
+        port: output.port,
+      };
+
       this.outputs.push({
         name,
+        details,
+        type: output.type,
         enabled: true,
         connected: false,
       });
 
-      window.api.addOutput(output.type, name, {
-        host: output.host,
-        port: output.port,
-      });
+      window.api.addOutput(output.type, name, details);
     },
 
     deleteOutput (index) {
@@ -251,6 +286,34 @@ export default {
 
         this.outputOptions.find((o) => o.key === 'serial').children = newOptions;
       });
+    },
+
+    saveOutputs () {
+      const storedOutputs = this.outputs.map((output) => ({
+        name: output.name,
+        type: output.type,
+        details: output.details,
+        enabled: output.enabled,
+      }));
+
+      storage.save('outputs', storedOutputs);
+    },
+
+    loadOutputs () {
+      const storedOutputs = storage.load('outputs');
+
+      if (storedOutputs) {
+        this.outputs = storedOutputs.map((output) => ({
+          ...output,
+          connected: false,
+        }));
+
+        this.outputs.forEach((output) => {
+          // We can't pass a proxied object to Electron so we must use the spread operator on details
+          // here to copy to a plain old object...
+          window.api.addOutput(output.type, output.name, { ...output.details }, output.enabled);
+        });
+      }
     },
   },
 };
