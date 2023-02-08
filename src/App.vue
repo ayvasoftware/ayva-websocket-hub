@@ -59,7 +59,7 @@
           <div class="enabled">
             <ayva-checkbox v-model="output.enabled" @change="toggleOutputEnabled(output.name, $event)" />
           </div>
-          <div class="name">
+          <div class="name" :title="output.name">
             <span>{{ output.name }}</span>
           </div>
           <div class="status">
@@ -220,6 +220,8 @@ export default {
     selectOutput (key) {
       if (key === 'network') {
         this.showNetworkModal = true;
+      } else if (key.startsWith('serial:')) {
+        this.addSerialOutput(key);
       }
     },
 
@@ -249,6 +251,28 @@ export default {
       });
 
       window.api.addOutput(output.type, name, details);
+    },
+
+    addSerialOutput (name) {
+      if (this.outputs.find((o) => o.name === name)) {
+        return;
+      }
+
+      const type = 'serial';
+
+      const details = {
+        path: name.substring(7), // Remove "serial:" prefix...
+      };
+
+      this.outputs.push({
+        name,
+        details,
+        type,
+        enabled: true,
+        connected: false,
+      });
+
+      window.api.addOutput(type, name, details);
     },
 
     deleteOutput (index) {

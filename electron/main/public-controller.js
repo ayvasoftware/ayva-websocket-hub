@@ -3,6 +3,7 @@ import { WebSocketServer } from 'ws';
 import _ from 'lodash';
 import WebSocketOutput from './lib/websocket-output';
 import UdpOutput from './lib/udp-output';
+import SerialOutput from './lib/serial-output';
 
 /**
  * This is the Public Backend Controller. All methods on this class will be made available
@@ -54,6 +55,8 @@ export default class PublicController {
       output = new WebSocketOutput(id, this.events, details.host, details.port);
     } else if (type === 'udp') {
       output = new UdpOutput(id, this.events, details.host, details.port);
+    } else if (type === 'serial') {
+      output = new SerialOutput(id, this.events, details.path);
     }
 
     if (output) {
