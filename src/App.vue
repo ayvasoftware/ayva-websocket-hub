@@ -14,7 +14,7 @@
               @keydown="restrictNumbers"
             >
           </template>
-          Port must be a number between 1 and 65535.
+          {{ portInvalidMessage }}
         </n-tooltip>
         <button
           class="toggle-connection"
@@ -120,13 +120,13 @@ export default {
       appMinHeight: 250,
       minOutputsHeight: 121,
       outputsHeight: '121px',
+      portInvalidMessage: '',
     };
   },
 
   computed: {
     portInvalid () {
-      const port = Number(this.port);
-      return !(Number.isFinite(port) && port >= 1 && port <= 65535);
+      return !!this.portInvalidMessage;
     },
 
     toggleConnectionClass () {
@@ -148,12 +148,19 @@ export default {
 
   watch: {
     port (value) {
+      const invalidMessage = 'Port must be a number between 1 and 65535.';
+
       if (value) {
         const port = Number(value);
 
         if (Number.isFinite(port) && port >= 1 && port <= 65535) {
+          this.portInvalidMessage = '';
           storage.save('port', port);
+        } else {
+          this.portInvalidMessage = invalidMessage;
         }
+      } else {
+        this.portInvalidMessage = invalidMessage;
       }
     },
 
@@ -288,6 +295,12 @@ export default {
     startServer () {
       api.startServer(this.port).then(() => {
         this.state = 'Listening';
+      }).catch((error) => {
+        this.portInvalidMessage = `Could not start server on port ${this.port}.`;
+
+        if (error.message.indexOf('EADDRINUSE') !== -1) {
+          this.portInvalidMessage += ' Address already in use.';
+        }
       });
     },
 

@@ -101,31 +101,41 @@ export default class PublicController {
   startServer (port) {
     this.stopServer();
 
-    const server = new WebSocketServer({ port, path: '/ws' });
+    return new Promise((resolve, reject) => {
+      const server = new WebSocketServer({ port, path: '/ws' });
 
-    server.on('connection', (websocket) => {
-      this.events.send('connected');
+      server.on('error', (error) => {
+        reject(error);
+      });
 
-      websocket.on('message', (data) => {
-        const forward = Buffer.from(data);
+      server.on('listening', () => {
+        resolve();
+      });
 
-        this.events.send('message', forward.toString());
-        for (const output of this.#outputs) {
-          if (output.connected && output.enabled) {
-            output.write(forward.toString());
+      server.on('connection', (websocket) => {
+        this.events.send('connected');
+
+        websocket.on('message', (data) => {
+          const forward = Buffer.from(data);
+
+          this.events.send('message', forward.toString());
+          for (const output of this.#outputs) {
+            if (output.connected && output.enabled) {
+              output.write(forward.toString());
+            }
           }
-        }
+        });
+
+        websocket.on('close', () => {
+          this.#websocket = null;
+          this.events.send('disconnected');
+        });
+
+        this.#websocket = websocket;
       });
 
-      websocket.on('close', () => {
-        this.#websocket = null;
-        this.events.send('disconnected');
-      });
-
-      this.#websocket = websocket;
+      this.#server = server;
     });
-
-    this.#server = server;
   }
 
   /**
