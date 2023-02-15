@@ -63,7 +63,8 @@
             <span>{{ output.name }}</span>
           </div>
           <div class="status">
-            {{ output.connected ? 'Connected' : 'Disconnected' }}
+            <div class="connect-status-icon" :class="output.connected ? 'connected' : 'disconnected'" />
+            <span>{{ output.connected ? 'Connected' : 'Disconnected' }}</span>
           </div>
           <div class="delete">
             <close-icon class="icon" @click="deleteOutput(index)" />
@@ -72,7 +73,8 @@
       </div>
     </div>
     <div class="footer">
-      <label>Status:</label>
+      <div class="loader" :hidden="state !== 'Listening'" />
+      <div class="connect-status-icon" :class="state.toLowerCase()" :hidden="state === 'Listening'" />
       <span class="status">{{ state }}</span>
     </div>
 
@@ -422,7 +424,7 @@ export default {
 
   .output-table .header, .outputs {
     display: grid;
-    grid-template-columns: 1fr 200px 1fr 1fr;
+    grid-template-columns: 1fr 200px 112px 1fr;
     grid-row-gap: 10px;
     padding-top: 10px;
   }

@@ -143,20 +143,20 @@ button[disabled] {
   margin-right: 10px;
 }
 
+.connect-status-icon.disconnected {
+  background-color: #a80000;
+}
+
+.connect-status-icon.connected {
+  background-color: green;
+}
+
 .connect-icon svg {
   width: 18px;
   height: 18px;
   position: relative;
   left: 5px;
   top: 1px;
-}
-
-.connected > .connect-status-icon {
-  background-color: green;
-}
-
-.disconnected > .connect-status-icon {
-  background-color: rgb(168, 0, 0);
 }
 
 .disconnected:hover {
