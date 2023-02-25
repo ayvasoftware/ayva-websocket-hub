@@ -1,5 +1,3 @@
-// TODO: Use an external library (such as useStorage in VueUse?)
-
 class Storage {
   namespace = '';
 

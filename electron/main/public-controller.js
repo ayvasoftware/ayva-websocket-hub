@@ -18,6 +18,8 @@ export default class PublicController {
 
   #outputs = [];
 
+  #closedSocketOnPurpose = null; // Way to distinguish intentional disconnects vs abrupt disconnects.
+
   constructor () {
     this.events = null;
   }
@@ -129,6 +131,12 @@ export default class PublicController {
         websocket.on('close', () => {
           this.#websocket = null;
           this.events.send('disconnected');
+
+          if (!this.#closedSocketOnPurpose) {
+            this.events.send('restart-server');
+          }
+
+          this.#closedSocketOnPurpose = null;
         });
 
         this.#websocket = websocket;
@@ -144,6 +152,7 @@ export default class PublicController {
   stopServer () {
     if (this.#server) {
       if (this.#websocket) {
+        this.#closedSocketOnPurpose = true;
         this.#websocket.close();
       }
 

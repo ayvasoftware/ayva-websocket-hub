@@ -4,4 +4,5 @@ export default [
   'message',
   'output-connected',
   'output-disconnected',
+  'restart-server',
 ];

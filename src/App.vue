@@ -75,7 +75,7 @@
     <div class="footer">
       <div class="loader" :hidden="state !== 'Listening'" />
       <div class="connect-status-icon" :class="state.toLowerCase()" :hidden="state === 'Listening'" />
-      <span class="status">{{ state }}</span>
+      <span class="status">{{ state === 'Listening' ? 'Listening...' : state }}</span>
     </div>
 
     <n-modal :show="showNetworkModal" :auto-focus="false">
@@ -186,6 +186,10 @@ export default {
 
     window.apiEvents.onDisconnected(() => {
       this.stopServer();
+    });
+
+    window.apiEvents.onRestartServer(() => {
+      this.startServer();
     });
 
     window.apiEvents.onOutputConnected((name) => {
@@ -443,7 +447,7 @@ export default {
     justify-content: center;
   }
 
-  .outputs .status, .outputs .delete {
+ .outputs .delete {
     justify-content: center;
   }
 
