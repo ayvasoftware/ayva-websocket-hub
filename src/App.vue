@@ -176,6 +176,7 @@ export default {
 
   mounted () {
     setInterval(this.refreshSerialDevices, 1000);
+
     window.addEventListener('resize', () => {
       this.outputsHeight = `${this.minOutputsHeight + window.innerHeight - this.appMinHeight}px`;
     });
@@ -268,6 +269,7 @@ export default {
 
     addSerialOutput (name) {
       if (this.outputs.find((o) => o.name === name)) {
+        // No duplicates.
         return;
       }
 
