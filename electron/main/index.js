@@ -9,7 +9,7 @@
 // │ └── index.html    > Electron-Renderer
 //
 import {
-  app, BrowserWindow, shell
+  app, BrowserWindow, Menu, shell
 } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
@@ -41,6 +41,8 @@ const devUrl = process.env.VITE_DEV_SERVER_URL;
 const width = 500;
 const height = 250;
 const maxHeight = 500;
+
+Menu.setApplicationMenu(null);
 
 async function createWindow () {
   win = new BrowserWindow({

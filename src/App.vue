@@ -1,6 +1,8 @@
 <template>
   <div class="lil-gui container">
-    <div class="toolbar" />
+    <div class="toolbar">
+      Ayva WebSocket Hub
+    </div>
     <div class="setup">
       <div class="port">
         <label :disabled="disableDisconnected">Port:</label>
@@ -368,6 +370,10 @@ export default {
   .toolbar {
     -webkit-app-region: drag;
     background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
   }
 
   .container {
