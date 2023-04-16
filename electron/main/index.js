@@ -21,11 +21,13 @@ process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST_ELECTRON, '../public')
   : process.env.DIST;
 
+const isWindows = process.platform === 'win32';
+
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration();
 
 // Set application name for Windows 10+ notifications
-if (process.platform === 'win32') app.setAppUserModelId(app.getName());
+if (isWindows) app.setAppUserModelId(app.getName());
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -58,7 +60,7 @@ async function createWindow () {
     titleBarOverlay: {
       color: '#000000',
       symbolColor: '#6784bb',
-      height: 25,
+      height: isWindows ? 25 : '25px',
     },
     icon: join(process.env.PUBLIC, 'ayva.ico'),
     webPreferences: {
