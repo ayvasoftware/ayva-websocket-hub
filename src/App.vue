@@ -447,7 +447,7 @@ export default {
   }
 
   .outputs {
-    overflow: scroll;
+    overflow: auto;
   }
 
   .outputs .enabled {

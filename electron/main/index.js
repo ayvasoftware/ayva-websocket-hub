@@ -57,7 +57,8 @@ async function createWindow () {
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: '#000000',
-      height: '25px',
+      symbolColor: '#6784bb',
+      height: 25,
     },
     icon: join(process.env.PUBLIC, 'ayva.ico'),
     webPreferences: {
