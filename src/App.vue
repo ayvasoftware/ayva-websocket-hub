@@ -78,6 +78,13 @@
       <div class="loader" :hidden="state !== 'Listening'" />
       <div class="connect-status-icon" :class="state.toLowerCase()" :hidden="state === 'Listening'" />
       <span class="status">{{ state === 'Listening' ? 'Listening...' : state }}</span>
+      <div class="support">
+        <a target="_blank" href="https://www.patreon.com/soritesparadox">
+          <div class="patreon-icon">
+            <patreon-icon class="icon" />
+          </div>
+        </a>
+      </div>
     </div>
 
     <n-modal :show="showNetworkModal" :auto-focus="false">
@@ -488,5 +495,23 @@ export default {
     display: flex;
     align-items: center;
     padding-left: 10px;
+  }
+
+  .patreon-icon, .support a {
+    color: rgb(255, 66, 77);
+  }
+
+  .patreon-icon .icon {
+    width: 16px;
+  }
+
+  .support {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: rgb(176, 176, 176);
+    opacity: 0.75;
+    margin-left: auto;
+    padding-right: 12px;
   }
 </style>
