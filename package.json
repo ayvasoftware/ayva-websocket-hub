@@ -1,6 +1,6 @@
 {
   "name": "ayva-websocket-hub",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "dist-electron/main/index.js",
   "description": "Desktop application that allows forwarding data from a WebSocket to multiple outputs.",
   "author": "soritesparadox",
