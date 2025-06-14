@@ -65,8 +65,17 @@
             <span>{{ output.name }}</span>
           </div>
           <div class="status">
-            <div class="connect-status-icon" :class="output.connected ? 'connected' : 'disconnected'" />
-            <span>{{ output.connected ? 'Connected' : 'Disconnected' }}</span>
+            <div v-if="output.connecting" style="width: 22px">
+              <div class="loader" style="left: -6px" />
+            </div>
+            <div v-else class="connect-status-icon" :class="output.connected ? 'connected' : 'disconnected'" />
+            <span>{{ connectStatus(output) }}</span>
+            <span
+              v-if="output.type === 'web-ble' && !output.connected && !output.connecting"
+              style="display: flex; align-items: center; filter: brightness(300%);"
+            >
+              <refresh-ble-icon class="refresh-ble icon" @click="refreshBLEOutput(output)" />
+            </span>
           </div>
           <div class="delete">
             <close-icon class="icon" @click="deleteOutput(index)" />
@@ -101,8 +110,10 @@
 import AyvaNetworkModal from './components/AyvaNetworkModal.vue';
 import AyvaCheckbox from './components/widgets/AyvaCheckbox.vue';
 import Storage from './lib/ayva-storage.js';
+import RubjoyBLEDevice from './lib/rubjoy-ble-device.js';
 
 const storage = new Storage('settings');
+const rubjoy = new RubjoyBLEDevice();
 
 export default {
   components: {
@@ -123,6 +134,9 @@ export default {
         key: 'serial',
         label: 'Serial',
         children: [],
+      }, {
+        key: 'rubjoy',
+        label: 'Rubjoy',
       }],
 
       showNetworkModal: false,
@@ -183,7 +197,7 @@ export default {
     },
   },
 
-  mounted () {
+  async mounted () {
     setInterval(this.refreshSerialDevices, 1000);
 
     window.addEventListener('resize', () => {
@@ -218,6 +232,12 @@ export default {
       }
     });
 
+    window.apiEvents.onWebBleWrite((deviceName, tcode) => {
+      if (deviceName === 'Bluno') {
+        rubjoy.write(tcode);
+      }
+    });
+
     this.loadOutputs();
 
     this.port = storage.load('port') || 8080;
@@ -245,6 +265,8 @@ export default {
         this.showNetworkModal = true;
       } else if (key.startsWith('serial:')) {
         this.addSerialOutput(key);
+      } else if (key === 'rubjoy') {
+        this.addBLEOutput('Rubjoy', 'Bluno');
       }
     },
 
@@ -299,10 +321,56 @@ export default {
       window.api.addOutput(type, name, details);
     },
 
+    addBLEOutput (outputName, deviceName) {
+      if (this.outputs.find((o) => o.name === outputName)) {
+        // No duplicates.
+        return;
+      }
+
+      const type = 'web-ble';
+
+      const details = {
+        deviceName,
+      };
+
+      const output = {
+        name: outputName,
+        details,
+        type,
+        enabled: true,
+        connected: false,
+      };
+
+      this.outputs.push(output);
+
+      window.api.addOutput(type, outputName, details);
+      this.refreshBLEOutput(output);
+    },
+
+    refreshBLEOutput (output) {
+      if (output.name === 'Rubjoy') {
+        output.connecting = true;
+
+        rubjoy.requestConnection().then(() => {
+          api.sendWebBLEConnected(output.details.deviceName);
+
+          rubjoy.onDisconnect(() => {
+            api.sendWebBLEDisconnected(output.details.deviceName);
+          });
+        }).finally(() => {
+          output.connecting = false;
+        });
+      }
+    },
+
     deleteOutput (index) {
       const [deletedOutput] = this.outputs.splice(index, 1);
 
       api.deleteOutput(deletedOutput.name);
+
+      if (deletedOutput.name === 'Rubjoy') {
+        rubjoy.disconnect();
+      }
 
       if (this.outputs.length <= 0) {
         this.stopServer();
@@ -368,6 +436,22 @@ export default {
           window.api.addOutput(output.type, output.name, { ...output.details }, output.enabled);
         });
       }
+    },
+
+    connectStatus (output) {
+      if (output.connecting && output.type === 'web-ble') {
+        return 'Scanning';
+      }
+
+      if (output.connecting) {
+        return 'Connecting';
+      }
+
+      if (output.connected) {
+        return 'Connected';
+      }
+
+      return 'Disconnected';
     },
   },
 };
@@ -443,7 +527,7 @@ export default {
 
   .output-table .header, .outputs {
     display: grid;
-    grid-template-columns: 1fr 200px 112px 1fr;
+    grid-template-columns: 1fr 200px 150px 1fr;
     grid-row-gap: 10px;
     padding-top: 10px;
   }
@@ -513,5 +597,24 @@ export default {
     opacity: 0.75;
     margin-left: auto;
     padding-right: 12px;
+  }
+
+  .connect-status-icon {
+    cursor: default;
+  }
+
+  .refresh-ble.icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    color: var(--ayva-button-primary-color);
+  }
+
+  .refresh-ble.icon:hover {
+    color: var(--ayva-button-primary-color-hover);
+  }
+
+  .refresh-ble.icon:active {
+    color: var(--ayva-button-primary-color-active);
   }
 </style>

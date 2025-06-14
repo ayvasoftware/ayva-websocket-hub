@@ -5,4 +5,6 @@ export default [
   'output-connected',
   'output-disconnected',
   'restart-server',
+  'web-ble-disconnect',
+  'web-ble-write',
 ];

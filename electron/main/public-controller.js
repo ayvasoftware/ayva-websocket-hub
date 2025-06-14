@@ -4,6 +4,7 @@ import _ from 'lodash';
 import WebSocketOutput from './lib/websocket-output';
 import UdpOutput from './lib/udp-output';
 import SerialOutput from './lib/serial-output';
+import WebBLEOutput from './lib/web-ble-output';
 
 /**
  * This is the Public Backend Controller. All methods on this class will be made available
@@ -59,6 +60,8 @@ export default class PublicController {
       output = new UdpOutput(id, this.events, details.host, details.port);
     } else if (type === 'serial') {
       output = new SerialOutput(id, this.events, details.path);
+    } else if (type === 'web-ble') {
+      output = new WebBLEOutput(id, this.events, details.deviceName);
     }
 
     if (output) {
@@ -92,6 +95,22 @@ export default class PublicController {
 
     if (output) {
       output.enabled = enabled;
+    }
+  }
+
+  sendWebBLEConnected (deviceName) {
+    for (const output of this.#outputs) {
+      if (output instanceof WebBLEOutput) {
+        output.onWebBLEConnected(deviceName);
+      }
+    }
+  }
+
+  sendWebBLEDisconnected (deviceName) {
+    for (const output of this.#outputs) {
+      if (output instanceof WebBLEOutput) {
+        output.onWebBLEDisconnected(deviceName);
+      }
     }
   }
 

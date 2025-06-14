@@ -98,6 +98,15 @@ async function createWindow () {
       }
     },
   };
+
+  webContents.on('select-bluetooth-device', (event, devices, callback) => {
+    event.preventDefault();
+    const rubjoy = devices.find((device) => device.deviceName === 'Bluno');
+
+    if (rubjoy) {
+      callback(rubjoy.deviceId);
+    }
+  });
 }
 
 app.whenReady().then(() => createWindow());

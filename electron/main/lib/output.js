@@ -58,4 +58,8 @@ export default class Output {
 
     this.#disposed = true;
   }
+
+  getEvents () {
+    return this.#events;
+  }
 }
